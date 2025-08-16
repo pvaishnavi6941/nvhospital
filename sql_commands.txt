@@ -1,0 +1,65 @@
+-- Create the database
+CREATE DATABASE IF NOT EXISTS hospital_management;
+USE hospital_management;
+
+-- Create users table
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at DATETIME NOT NULL,
+    last_login DATETIME,
+    is_active BOOLEAN DEFAULT TRUE,
+    UNIQUE INDEX email_index (email)
+);
+
+-- Create contact_queries table
+CREATE TABLE IF NOT EXISTS contact_queries (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    message TEXT NOT NULL,
+    submitted_at DATETIME NOT NULL,
+    status ENUM('new', 'in_progress', 'resolved') DEFAULT 'new',
+    INDEX email_index (email)
+);
+
+-- Create user_sessions table
+CREATE TABLE IF NOT EXISTS user_sessions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    session_token VARCHAR(255) NOT NULL,
+    created_at DATETIME NOT NULL,
+    expires_at DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    INDEX session_token_index (session_token)
+);
+
+-- Create appointments table
+CREATE TABLE IF NOT EXISTS appointments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    appointment_date DATE NOT NULL,
+    appointment_time TIME NOT NULL,
+    status ENUM('scheduled', 'completed', 'cancelled') DEFAULT 'scheduled',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX email_index (email),
+    INDEX date_time_index (appointment_date, appointment_time)
+);
+ALTER TABLE appointments ADD COLUMN doctor VARCHAR(100) NOT NULL AFTER email;
+
+DROP TABLE contact_queries;
+-- Create the contact_queries table
+CREATE TABLE contact_queries (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('pending', 'responded', 'closed') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
