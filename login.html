@@ -312,37 +312,29 @@ function handleSignup(event) {
     const email = document.getElementById('signupEmail');
     const password = document.getElementById('signupPassword');
     const confirmPassword = document.getElementById('confirmPassword');
-    let isValid = true;
 
-    if (!name.value.trim()) {
-        showError(name, 'Name is required');
-        isValid = false;
-    } else {
-        clearError(name);
-    }
-
-    if (!validateEmail(email.value)) {
-        showError(email, 'Please enter a valid email address');
-        isValid = false;
-    } else {
-        clearError(email);
-    }
-
-    if (password.value.length < 6) {
-        showError(password, 'Password must be at least 6 characters');
-        isValid = false;
-    } else {
-        clearError(password);
+    // Basic validation
+    if (!name.value || !email.value || !password.value || !confirmPassword.value) {
+        showError(name, 'Please fill in all fields');
+        return;
     }
 
     if (password.value !== confirmPassword.value) {
         showError(confirmPassword, 'Passwords do not match');
-        isValid = false;
-    } else {
-        clearError(confirmPassword);
+        return;
     }
 
-    if (isValid) {
+    if (password.value.length < 6) {
+        showError(password, 'Password must be at least 6 characters');
+        return;
+    }
+
+    // Show loading state
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Creating Account...';
+    submitBtn.disabled = true;
+
         fetch('/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -356,10 +348,7 @@ function handleSignup(event) {
         .then(data => {
             console.log('Signup response:', data);
             if (data.success) {
-                showSuccess(event.target);
-                setTimeout(() => {
-                    window.location.href = data.redirect;
-                }, 1000); // Redirect after 1 second to show success message
+                window.location.href = data.redirect || '/dashboard';
             } else {
                 showError(email, data.message || 'Registration failed');
             }
@@ -367,8 +356,12 @@ function handleSignup(event) {
         .catch(error => {
             console.error('Error:', error);
             showError(email, 'An error occurred during registration');
+        })
+        .finally(() => {
+            // Restore button state
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
         });
-    }
 }
     </script>
 </body>
