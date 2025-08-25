@@ -10,11 +10,12 @@ import secrets
 
 app = Flask(__name__)
 
-# MySQL Configuration
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '3006'
-app.config['MYSQL_DB'] = 'hospital_management'
+# Database Configuration for Render
+import os
+app.config['MYSQL_HOST'] = os.environ.get('DB_HOST', 'localhost')
+app.config['MYSQL_USER'] = os.environ.get('DB_USER', 'root')
+app.config['MYSQL_PASSWORD'] = os.environ.get('DB_PASSWORD', '3006')
+app.config['MYSQL_DB'] = os.environ.get('DB_NAME', 'hospital_management')
 app.config['SECRET_KEY'] = 'hospital_management_secret_key'  # Fixed secret key instead of random
 
 mysql = MySQL(app)
@@ -433,4 +434,5 @@ def book_appointment():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
